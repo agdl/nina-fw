@@ -33,6 +33,7 @@ extern "C" {
 #include "CommandHandler.h"
 
 #define SPI_BUFFER_LEN SPI_MAX_DMA_LEN
+#define COEXISTENCE
 
 int debug = 0;
 
@@ -89,12 +90,18 @@ void setup() {
   pinMode(15, INPUT);
   pinMode(21, INPUT);
 
+#ifndef COEXISTENCE
   pinMode(5, INPUT);
+  setupBluetooth();
   if (digitalRead(5) == LOW) {
     setupBluetooth();
   } else {
     setupWiFi();
   }
+#else
+  setupBluetooth();
+  setupWiFi();
+#endif
 }
 
 // #define UNO_WIFI_REV2
@@ -103,25 +110,30 @@ void setupBluetooth() {
   periph_module_enable(PERIPH_UART1_MODULE);
   periph_module_enable(PERIPH_UHCI0_MODULE);
 
-#ifdef UNO_WIFI_REV2
+#if defined(UNO_WIFI_REV2) || defined(COEXISTENCE) 
   uart_set_pin(UART_NUM_1, 1, 3, 33, 0); // TX, RX, RTS, CTS
 #else
   uart_set_pin(UART_NUM_1, 23, 12, 18, 5);
 #endif
+
   uart_set_hw_flow_ctrl(UART_NUM_1, UART_HW_FLOWCTRL_CTS_RTS, 5);
 
   esp_bt_controller_config_t btControllerConfig = BT_CONTROLLER_INIT_CONFIG_DEFAULT(); 
 
   btControllerConfig.hci_uart_no = UART_NUM_1;
-#ifdef UNO_WIFI_REV2
+
+#if defined(UNO_WIFI_REV2) || defined(COEXISTENCE) 
   btControllerConfig.hci_uart_baudrate = 115200;
 #else
   btControllerConfig.hci_uart_baudrate = 912600;
 #endif
 
   esp_bt_controller_init(&btControllerConfig);
+#ifndef COEXISTENCE
   while (esp_bt_controller_get_status() == ESP_BT_CONTROLLER_STATUS_IDLE);
+#endif
   esp_bt_controller_enable(ESP_BT_MODE_BLE);
+#ifndef COEXISTENCE
   esp_bt_sleep_enable();
 
   vTaskSuspend(NULL);
@@ -129,6 +141,7 @@ void setupBluetooth() {
   while (1) {
     vTaskDelay(portMAX_DELAY);
   }
+#endif
 }
 
 void setupWiFi() {
