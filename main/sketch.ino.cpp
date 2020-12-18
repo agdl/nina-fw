@@ -127,7 +127,7 @@ void setupBluetooth() {
   esp_bt_controller_config_t btControllerConfig = BT_CONTROLLER_INIT_CONFIG_DEFAULT(); 
 
   btControllerConfig.hci_uart_no = UART_NUM_1;
-if defined(UNO_WIFI_REV2) || defined(COEXISTENCE) 
+#if defined(UNO_WIFI_REV2) || defined(COEXISTENCE) 
   btControllerConfig.hci_uart_baudrate = 115200;
 #else
   btControllerConfig.hci_uart_baudrate = 912600;
