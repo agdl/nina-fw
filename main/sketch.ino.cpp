@@ -42,6 +42,7 @@ extern "C" {
 
 #define SPI_BUFFER_LEN SPI_MAX_DMA_LEN
 #define COEXISTENCE
+#define INDIPENDENT
 
 int debug = 0;
 
@@ -119,6 +120,8 @@ void setupBluetooth() {
 
 #if defined(UNO_WIFI_REV2) || defined(COEXISTENCE) 
   uart_set_pin(UART_NUM_1, 1, 3, 33, 0); // TX, RX, RTS, CTS
+#elif defined(INDIPENDENT)
+  uart_set_pin(UART_NUM_1, 1, 3, 19, 22); // TX, RX, RTS, CTS
 #else
   uart_set_pin(UART_NUM_1, 23, 12, 18, 5);
 #endif
